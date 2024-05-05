@@ -18,6 +18,8 @@ struct echipa{
 typedef struct echipa Team;
 
 void form_list(Team**, int, FILE*);
+int teamsRemaining(int numberOfTeams);
+void eliminateWorstTeams(Team**, int);
 void write_list(Team*, FILE*);
 
 #endif // BIBLIOTECA_H_INCLUDED

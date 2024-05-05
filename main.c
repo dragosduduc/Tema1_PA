@@ -13,7 +13,6 @@ int main(int argc, char* argv[]){
     }
     fscanf(c_in, "%d %d %d %d %d", &task[0], &task[1], &task[2], &task[3], &task[4]);
     fclose(c_in);
-    ///printf("%d %d %d %d %d\n", task[0], task[1], task[2], task[3], task[4]);
 
     //se deschide fișierul de intrare d.in
     FILE* d_in;
@@ -34,6 +33,18 @@ int main(int argc, char* argv[]){
     form_list(&head, numberOfTeams, d_in);
 
     fclose(d_in);
+
+    //se rezolvă cerința 2, dacă se cere
+    if(task[1] == 1){
+
+        //se calculează cea mai mare putere a lui 2 mai mică decât numărul total de echipe
+        int maxPower = teamsRemaining(numberOfTeams);
+
+        int teamsToEliminate = numberOfTeams - maxPower;
+
+        //se elimină echipele cu cele mai mici punctaje, pentru a se ajunge la un număr de echipe - putere a lui 2
+        eliminateWorstTeams(&head, teamsToEliminate);
+    }
 
     //se deschide fișierul de ieșire
     FILE* out;
