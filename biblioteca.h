@@ -17,9 +17,28 @@ struct echipa{
 };
 typedef struct echipa Team;
 
-void form_list(Team**, int, FILE*);
+struct meci{
+    Team* team1;
+    Team* team2;
+    struct meci *next;
+};
+typedef struct meci Match;
+
+struct Q{
+    Match* front;
+    Match* rear;
+};
+typedef struct Q Queue;
+
+void createList(Team**, int, FILE*);
 int teamsRemaining(int numberOfTeams);
 void eliminateWorstTeams(Team**, int);
-void write_list(Team*, FILE*);
+void writeList(Team*, FILE*);
+Queue* createQueue();
+void enQueue(Queue*, Match*);
+int isEmpty(Queue*);
+Match* deQueue(Queue*);
+void putMatchesInQueue(Queue*, Team**, int);
+void writeQueue(Queue*, FILE*);
 
 #endif // BIBLIOTECA_H_INCLUDED

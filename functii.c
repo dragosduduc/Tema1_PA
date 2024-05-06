@@ -4,7 +4,7 @@
 #include <limits.h>
 #include "biblioteca.h"
 
-void form_list(Team** head, int numberOfTeams, FILE* in){
+void createList(Team** head, int numberOfTeams, FILE* in){
     int i,j;
     for(i = 0; i < numberOfTeams; i++){
         Team* team = (Team*)malloc(sizeof(Team));
@@ -80,11 +80,72 @@ void eliminateWorstTeams(Team** head, int worstTeams){
     }
 }
 
-void write_list(Team* head, FILE *out){
+void writeList(Team* head, FILE* out){
     Team* iter = head;
     //cât timp elementul curent NU este NULL, i se afișează numele și se trece la next
     while(iter != NULL){
         fprintf(out, "%s\n", iter->name);
         iter = iter->next;
+    }
+}
+
+//createQueue din curs
+Queue* createQueue(){
+    Queue* q;
+    q = (Queue*)malloc(sizeof(Queue));
+    if(q == NULL) return NULL;
+    q->front = NULL;
+    q->rear = NULL;
+    return q;
+}
+
+//enQueue din curs, modificată pentru elemente de tip Match
+void enQueue(Queue* q, Match* game){
+    if(q->rear == NULL){
+        q->rear = game;
+        q->front = game;
+    }else{
+        (q->rear)->next = game;
+        q->rear = game;
+    }
+    game->next = NULL;
+}
+
+//isEmpty din curs
+int isEmpty(Queue* q){
+    return (q->front == NULL);
+}
+
+//deQueue din curs, modificată pentru elemente de tip Match
+Match* deQueue(Queue* q){
+    Match* aux = (Match*)malloc(sizeof(Match));
+    if(isEmpty(q))
+        printf("Queue is empty.\n");
+    aux = q->front;
+    q->front = (q->front)->next;
+    return aux;
+}
+
+void putMatchesInQueue(Queue* q, Team** head, int bestTeams){
+    int i;
+    //din listă se scot câte două echipe alăturate și se pun într-un meci în coadă
+    for(i = 0; i < bestTeams / 2; i++){
+            Match* game = (Match*)malloc(sizeof(Match));
+            game->team1 = (Team*)malloc(sizeof(Team));
+            game->team2 = (Team*)malloc(sizeof(Team));
+            game->team1 = *head;
+            *head = (*head)->next;
+            game->team2 = *head;
+            *head = (*head)->next;
+            enQueue(q, game);
+    }
+}
+
+void writeQueue(Queue* q, FILE* out){
+    while(!isEmpty(q)){
+        Match* cnt = (Match*)malloc(sizeof(Match));
+        cnt = deQueue(q);
+        fprintf(out, "%-32s - %32s\n", cnt->team1->name, cnt->team2->name);
+        free(cnt);
     }
 }

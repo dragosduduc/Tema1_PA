@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "biblioteca.h"
 int main(int argc, char* argv[]){
 
@@ -30,15 +29,16 @@ int main(int argc, char* argv[]){
 
     //se formează lista de echipe
     Team* head = NULL;
-    form_list(&head, numberOfTeams, d_in);
+    createList(&head, numberOfTeams, d_in);
 
     fclose(d_in);
 
     //se rezolvă cerința 2, dacă se cere
+    int maxPower;
     if(task[1] == 1){
 
         //se calculează cea mai mare putere a lui 2 mai mică decât numărul total de echipe
-        int maxPower = teamsRemaining(numberOfTeams);
+        maxPower = teamsRemaining(numberOfTeams);
 
         int teamsToEliminate = numberOfTeams - maxPower;
 
@@ -54,8 +54,23 @@ int main(int argc, char* argv[]){
     }
     
     //se scrie lista formată în fișierul de ieșire
-    write_list(head, out);
+    writeList(head, out);
     
+
+    //se rezolvă cerința 3, dacă se cere
+    if(task[2] == 1){
+
+        //se creează și se populează coada de meciuri
+        Queue* q;
+        q = createQueue();
+        putMatchesInQueue(q, &head, maxPower);
+
+        //se scrie coada formată în fișierul de ieșire
+        fprintf(out, "\n--- ROUND NO:1\n");
+        writeQueue(q, out);
+        
+    }
+
     fclose(out);
 
     return 0;
