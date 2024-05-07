@@ -29,7 +29,7 @@ int main(int argc, char* argv[]){
 
     //se formează lista de echipe
     Team* head = NULL;
-    createList(&head, numberOfTeams, d_in);
+    createInitialList(&head, numberOfTeams, d_in);
 
     fclose(d_in);
 
@@ -56,19 +56,52 @@ int main(int argc, char* argv[]){
     //se scrie lista formată în fișierul de ieșire
     writeList(head, out);
     
-
     //se rezolvă cerința 3, dacă se cere
+    Team* quarterFinalists = NULL;
     if(task[2] == 1){
 
         //se creează și se populează coada de meciuri
         Queue* q;
         q = createQueue();
-        putMatchesInQueue(q, &head, maxPower);
+        putMatchesFromListToQueue(q, &head, maxPower);
 
-        //se scrie coada formată în fișierul de ieșire
-        fprintf(out, "\n--- ROUND NO:1\n");
-        writeQueue(q, out);
-        
+        //se stabilește numărul rundei curente
+        int roundNumber = 0;
+
+        //se inițializează stivele pentru câștigători și pierzători și lista pentru ultimele opt echipe
+        Team* winnerStackTop;
+        Team* loserStackTop;
+
+        //cât timp au mai rămas meciuri/runde de jucat, se joacă
+        while(maxPower > 1){
+
+            roundNumber++;
+            winnerStackTop = loserStackTop = NULL;
+
+            fprintf(out, "\n--- ROUND NO:%d\n", roundNumber);
+            playMatches(q, &winnerStackTop, &loserStackTop, out);
+
+            //dacă am ajuns la ultimele opt echipe, se trec pierzătorii rundei curente în lista ultimelor opt echipe (doar pierzătorii pentru că restul se vor pune în listă după următoarele runde, după actualizarea punctajului)
+            if(maxPower <= 8)
+                putTeamsFromStackToList(&loserStackTop, &quarterFinalists);
+            
+            //se înjumătățește numărul de echipe (rămân doar câștigătorii), se afișează și se pun înapoi în coada de meciuri
+            maxPower = maxPower >> 1;
+            fprintf(out, "\nWINNERS OF ROUND NO:%d\n", roundNumber);
+            putMatchesFromStackToQueue(q, &winnerStackTop, maxPower, out);
+        }
+
+        //echipa câștigătoare, care a rămas în stivă (la ultimul ciclu, maxPower intră în funcția putMatchesFromStackToQueue cu valoarea 0), se scoate din stivă și se pune în lista ultimelor opt echipe
+        Team* champs = pop(&winnerStackTop);
+        champs->next = quarterFinalists;
+        quarterFinalists = champs;
+        fprintf(out, "%-33s -  %.2f\n", champs->name, champs->points);
+    }
+
+    //se rezolvă cerința 4, dacă se cere
+    if(task[3] == 1){
+        fprintf(out, "\nTOP 8 TEAMS:\n");
+        writeListWithPoints(quarterFinalists, out);
     }
 
     fclose(out);
