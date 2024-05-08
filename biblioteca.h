@@ -30,6 +30,15 @@ struct Q{
 };
 typedef struct Q Queue;
 
+struct echipaInArbore{
+    int numberOfPlayers;
+    char name[50];
+    Player* members;
+    float points;
+    struct echipaInArbore *left, *right;
+};
+typedef struct echipaInArbore Node;
+
 void createInitialList(Team**, int, FILE*);
 int teamsRemaining(int numberOfTeams);
 void eliminateWorstTeams(Team**, int);
@@ -49,5 +58,7 @@ void moveMatchesFromStackToQueue(Queue*, Team**, int, FILE*);
 void matchResult(Team*, Team*, Team**, Team**);
 void copyTeamsFromStackToList(Team*, Team**);
 void playMatches(Queue*, Team**, Team**, FILE*);
+Node* insertInBST(Node*, Team*);
+void inorderReverse(Node*, FILE*);
 
 #endif // BIBLIOTECA_H_INCLUDED

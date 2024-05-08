@@ -247,3 +247,33 @@ void playMatches(Queue* q, Team** win, Team** lose, FILE* out){
                 matchResult(cntMatch->team1, cntMatch->team2, win, lose);
             }
 }
+
+Node* insertInBST(Node* root, Team* team){
+    if(root == NULL){
+        int i;
+        Node* newNode = (Node*)malloc(sizeof(Node));
+        strcpy(newNode->name, team->name);
+        newNode->numberOfPlayers = team->numberOfPlayers;
+        newNode->points = team->points;
+        for(i = 0; i < team->numberOfPlayers; i++){
+            strcpy(newNode->members[i].firstName, team->members[i].firstName);
+            strcpy(newNode->members[i].secondName, team->members[i].secondName);
+            newNode->members[i].points = team->members[i].points;
+        }
+        newNode->left = newNode->right = NULL;
+        return newNode;
+    }
+    if(team->points < root->points)
+        root->left = insertInBST(root->left, team);
+    else if(team->points > root->points)
+        root->right = insertInBST(root->right, team);
+    return root;
+}
+
+void inorderReverse(Node* root, FILE* out){
+    if(root != NULL){
+        inorderReverse(root->right, out);
+        fprintf(out, "%-33s -  %.2f\n", root->name, root->points);
+        inorderReverse(root->left, out);
+    }
+}

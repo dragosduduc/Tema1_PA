@@ -100,9 +100,15 @@ int main(int argc, char* argv[]){
     }
 
     //se rezolvă cerința 4, dacă se cere
+    Node* BST = NULL;
     if(task[3] == 1){
         fprintf(out, "\nTOP 8 TEAMS:\n");
-        writeListWithPoints(quarterFinalists, out);
+        Team* iter = quarterFinalists;
+        while(iter != NULL){
+            BST = insertInBST(BST, iter);
+            iter = iter->next;
+        }
+        inorderReverse(BST, out);
     }
 
     fclose(out);
