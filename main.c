@@ -63,7 +63,7 @@ int main(int argc, char* argv[]){
         //se creează și se populează coada de meciuri
         Queue* q;
         q = createQueue();
-        putMatchesFromListToQueue(q, &head, maxPower);
+        moveMatchesFromListToQueue(q, &head, maxPower);
 
         //se stabilește numărul rundei curente
         int roundNumber = 0;
@@ -81,20 +81,21 @@ int main(int argc, char* argv[]){
             fprintf(out, "\n--- ROUND NO:%d\n", roundNumber);
             playMatches(q, &winnerStackTop, &loserStackTop, out);
 
-            //dacă am ajuns la ultimele opt echipe, se trec pierzătorii rundei curente în lista ultimelor opt echipe (doar pierzătorii pentru că restul se vor pune în listă după următoarele runde, după actualizarea punctajului)
-            if(maxPower <= 8)
-                putTeamsFromStackToList(&loserStackTop, &quarterFinalists);
+            //când se ajunge la runda de 16 echipe, cele 8 echipe învingătoare se copiază într-o listă
+            if(maxPower == 16)
+                copyTeamsFromStackToList(winnerStackTop, &quarterFinalists);
+
+            //se șterg echipele care au pierdut în runda curentă
+            deleteStack(&loserStackTop);
             
-            //se înjumătățește numărul de echipe (rămân doar câștigătorii), se afișează și se pun înapoi în coada de meciuri
+            //se înjumătățește numărul de echipe - rămân doar câștigătorii -, se afișează și se pun înapoi în coada de meciuri
             maxPower = maxPower >> 1;
             fprintf(out, "\nWINNERS OF ROUND NO:%d\n", roundNumber);
-            putMatchesFromStackToQueue(q, &winnerStackTop, maxPower, out);
+            moveMatchesFromStackToQueue(q, &winnerStackTop, maxPower, out);
         }
 
-        //echipa câștigătoare, care a rămas în stivă (la ultimul ciclu, maxPower intră în funcția putMatchesFromStackToQueue cu valoarea 0), se scoate din stivă și se pune în lista ultimelor opt echipe
+        //echipa câștigătoare, care a rămas în stivă (la ultimul ciclu, maxPower intră în funcția putMatchesFromStackToQueue cu valoarea 0), se scoate din stivă și se afișează
         Team* champs = pop(&winnerStackTop);
-        champs->next = quarterFinalists;
-        quarterFinalists = champs;
         fprintf(out, "%-33s -  %.2f\n", champs->name, champs->points);
     }
 

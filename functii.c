@@ -144,7 +144,7 @@ Match* deQueue(Queue* q){
     return aux;
 }
 
-void putMatchesFromListToQueue(Queue* q, Team** head, int bestTeams){
+void moveMatchesFromListToQueue(Queue* q, Team** head, int bestTeams){
     int i;
     //din listă se scot câte două echipe alăturate și se pun într-un meci în coadă
     for(i = 0; i < bestTeams / 2; i++){
@@ -192,14 +192,14 @@ Team* pop(Team** top){
 
 void deleteStack(Team** top){
     Team* temp;
-    while(stackIsEmpty(*top)){
+    while(!stackIsEmpty(*top)){
         temp = *top;
         *top = (*top)->next;
         free(temp);
     }
 }
 
-void putMatchesFromStackToQueue(Queue* q, Team** stackTop, int bestTeams, FILE* out){
+void moveMatchesFromStackToQueue(Queue* q, Team** stackTop, int bestTeams, FILE* out){
     int i;
     //din stivă se scot câte două echipe alăturate și se pun într-un meci în coadă
     for(i = 0; i < bestTeams / 2; i++){
@@ -228,11 +228,14 @@ void matchResult(Team* firstTeam, Team* secondTeam, Team** winners, Team** loser
         }
 }
 
-void putTeamsFromStackToList(Team** stack, Team** head ){
-    while(!stackIsEmpty(*stack)){
-        Team* temp = pop(stack);
-        temp->next = *head;
-        *head = temp;
+void copyTeamsFromStackToList(Team* stack, Team** head ){
+    while(stack != NULL){
+        Team* temp = stack;
+        stack = stack->next;
+        Team* newElement = (Team*)malloc(sizeof(Team));
+        *newElement = *temp;
+        newElement->next = *head;
+        *head = newElement;
     }
 }
 

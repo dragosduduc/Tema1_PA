@@ -39,15 +39,15 @@ Queue* createQueue();
 void enQueue(Queue*, Match*);
 int queueIsEmpty(Queue*);
 Match* deQueue(Queue*);
-void putMatchesFromListToQueue(Queue*, Team**, int);
+void moveMatchesFromListToQueue(Queue*, Team**, int);
 void writeQueue(Queue*, FILE*);
 void push(Team**, Team*);
 int stackIsEmpty(Team*);
 Team* pop(Team**);
 void deleteStack(Team**);
-void putMatchesFromStackToQueue(Queue*, Team**, int, FILE*);
+void moveMatchesFromStackToQueue(Queue*, Team**, int, FILE*);
 void matchResult(Team*, Team*, Team**, Team**);
-void putTeamsFromStackToList(Team**, Team**);
+void copyTeamsFromStackToList(Team*, Team**);
 void playMatches(Queue*, Team**, Team**, FILE*);
 
 #endif // BIBLIOTECA_H_INCLUDED
