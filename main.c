@@ -103,11 +103,15 @@ int main(int argc, char* argv[]){
     Node* BST = NULL;
     if(task[3] == 1){
         fprintf(out, "\nTOP 8 TEAMS:\n");
+
+        //se parcurge lista celor mai bune 8 echipe și fiecare echipă se pune în BST
         Team* iter = quarterFinalists;
         while(iter != NULL){
             BST = insertInBST(BST, iter);
             iter = iter->next;
         }
+
+        //se parcurge BST-ul în ordine descrescătoare
         inorderReverse(BST, out);
     }
 

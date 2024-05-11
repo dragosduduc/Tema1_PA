@@ -2,15 +2,15 @@
 #define BIBLIOTECA_H_INCLUDED
 
 struct jucator{
-    char firstName[50];
-    char secondName[50];
+    char* firstName;
+    char* secondName;
     int points;
 };
 typedef struct jucator Player;
 
 struct echipa{
     int numberOfPlayers;
-    char name[50];
+    char* name;
     Player* members;
     float points;
     struct echipa *next;
@@ -32,7 +32,7 @@ typedef struct Q Queue;
 
 struct echipaInArbore{
     int numberOfPlayers;
-    char name[50];
+    char* name;
     Player* members;
     float points;
     struct echipaInArbore *left, *right;

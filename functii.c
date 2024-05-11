@@ -6,6 +6,7 @@
 
 void createInitialList(Team** head, int numberOfTeams, FILE* in){
     int i,j;
+    char buffer1[50], buffer2[50];
     for(i = 0; i < numberOfTeams; i++){
         Team* team = (Team*)malloc(sizeof(Team));
         team->next = NULL;
@@ -13,12 +14,26 @@ void createInitialList(Team** head, int numberOfTeams, FILE* in){
         fscanf(in, "%d", &team->numberOfPlayers);
         //se citește separat spațiul dintre numărul de membri și numele echipei
         fgetc(in);
-        fgets(team->name, 50, in);
-        //se formatează corect numele echipei (s-a citit împreună cu \n)
-        team->name[strlen(team->name)-2] = '\0';
+        //se citește numele echipei într-un buffer și se formatează
+        fgets(buffer1, 50, in);
+        buffer1[strlen(buffer1)-2] = '\0';
+        if(buffer1[strlen(buffer1) - 1] == ' ')
+            buffer1[strlen(buffer1) - 1] = '\0';
+        //se alocă memorie la pointer-ul din structură și se copiază string-ul din buffer în memoria de la pointer
+        team->name = (char*)malloc((strlen(buffer1) + 1) * sizeof(char));
+        strcpy(team->name, buffer1);
+        //se citesc, în mod asemănător, informațiile legate de jucători
         team->members = (Player*)malloc(team->numberOfPlayers * sizeof(Player));
         for(j = 0; j < team->numberOfPlayers; j++){
-            fscanf(in, "%s %s %d", team->members[j].firstName, team->members[j].secondName, &team->members[j].points);
+            fscanf(in, "%s %s %d", buffer1, buffer2, &team->members[j].points);
+            if(buffer1[strlen(buffer1) - 1] == ' ')
+                buffer1[strlen(buffer1) - 1] = '\0';
+            if(buffer2[strlen(buffer2) - 1] == ' ')
+                buffer2[strlen(buffer2) - 1] = '\0';
+            team->members[j].firstName = (char*)malloc((strlen(buffer1) + 1) * sizeof(char));
+            team->members[j].secondName = (char*)malloc((strlen(buffer2) + 1) * sizeof(char));
+            strcpy(team->members[j].firstName, buffer1);
+            strcpy(team->members[j].secondName, buffer2);
             team->points += team->members[j].points;
         }
         //se calculează media aritmetică specifică fiecărei echipe
@@ -89,6 +104,7 @@ void writeList(Team* head, FILE* out){
     }
 }
 
+//aceeași funcție ca și writeList(functia precedentă), dar se afișează și punctajul echipelor
 void writeListWithPoints(Team* head, FILE* out){
     Team* iter = head;
     while(iter != NULL){
@@ -157,6 +173,7 @@ void moveMatchesFromListToQueue(Queue* q, Team** head, int bestTeams){
     }
 }
 
+//scriere(cu format) din coadă
 void writeQueue(Queue* q, FILE* out){
     while(!queueIsEmpty(q)){
         Match* cnt = (Match*)malloc(sizeof(Match));
@@ -166,6 +183,7 @@ void writeQueue(Queue* q, FILE* out){
     }
 }
 
+//push din curs, modificată pentru tipul Team
 void push(Team** top, Team* team){
     team->next = *top;
     *top = team;
@@ -176,6 +194,7 @@ int stackIsEmpty(Team* top){
     return (top == NULL);
 }
 
+//pop din curs, modificată pentru tipul Team(returnează chiar elementul - același bloc de memorie)
 Team* pop(Team** top){
     Team* aux;
     if(stackIsEmpty(*top)){
@@ -190,6 +209,7 @@ Team* pop(Team** top){
     return aux;
 }
 
+//deleteStack din curs
 void deleteStack(Team** top){
     Team* temp;
     while(!stackIsEmpty(*top)){
@@ -213,6 +233,7 @@ void moveMatchesFromStackToQueue(Queue* q, Team** stackTop, int bestTeams, FILE*
 }
 void matchResult(Team* firstTeam, Team* secondTeam, Team** winners, Team** losers){
     int i;
+    //pe baza punctajului pe echipă, se stabilesc câștigătorii și pierzătorii, se pun în stivele corespunzătoare și se actualizează punctajele
     if(firstTeam->points > secondTeam->points){
         push(winners, firstTeam);
         push(losers, secondTeam);
@@ -228,6 +249,7 @@ void matchResult(Team* firstTeam, Team* secondTeam, Team** winners, Team** loser
         }
 }
 
+//se COPIAZĂ(dintr-un bloc de memorie în altul) echipele dintr-o stivă într-o listă
 void copyTeamsFromStackToList(Team* stack, Team** head ){
     while(stack != NULL){
         Team* temp = stack;
@@ -239,6 +261,7 @@ void copyTeamsFromStackToList(Team* stack, Team** head ){
     }
 }
 
+//se scot meciurile din coadă și se stabilește rezultatul lor folosind funcția matchResult
 void playMatches(Queue* q, Team** win, Team** lose, FILE* out){
     while(!queueIsEmpty(q)){
                 Match* cntMatch;
@@ -248,14 +271,20 @@ void playMatches(Queue* q, Team** win, Team** lose, FILE* out){
             }
 }
 
+//insertInBST din curs, modificată pentru tipul Team
 Node* insertInBST(Node* root, Team* team){
     if(root == NULL){
+        //se creează un nou nod și se pune la finalul BST-ului
         int i;
         Node* newNode = (Node*)malloc(sizeof(Node));
-        strcpy(newNode->name, team->name);
         newNode->numberOfPlayers = team->numberOfPlayers;
+        newNode->members = (Player*)malloc(newNode->numberOfPlayers * sizeof(Team));
         newNode->points = team->points;
+        newNode->name = (char*)malloc((strlen(team->name) + 1) * sizeof(char));
+        strcpy(newNode->name, team->name);
         for(i = 0; i < team->numberOfPlayers; i++){
+            newNode->members[i].firstName = (char*)malloc((strlen(team->members[i].firstName) + 1) * sizeof(char));
+            newNode->members[i].secondName = (char*)malloc((strlen(team->members[i].secondName) + 1) * sizeof(char));
             strcpy(newNode->members[i].firstName, team->members[i].firstName);
             strcpy(newNode->members[i].secondName, team->members[i].secondName);
             newNode->members[i].points = team->members[i].points;
@@ -267,9 +296,34 @@ Node* insertInBST(Node* root, Team* team){
         root->left = insertInBST(root->left, team);
     else if(team->points > root->points)
         root->right = insertInBST(root->right, team);
+    else if(team->points == root->points){
+        //se creează un nou nod și se pune pe următorul nivel față de root-ul curent(au același punctaj, deci se compară în funcție de nume)
+        int i;
+        Node* newNode = (Node*)malloc(sizeof(Node));
+        newNode->numberOfPlayers = team->numberOfPlayers;
+        newNode->members = (Player*)malloc(newNode->numberOfPlayers * sizeof(Team));
+        newNode->points = team->points;
+        newNode->name = (char*)malloc((strlen(team->name) + 1) * sizeof(char));
+        strcpy(newNode->name, team->name);
+        for(i = 0; i < team->numberOfPlayers; i++){
+            newNode->members[i].firstName = (char*)malloc((strlen(team->members[i].firstName) + 1) * sizeof(char));
+            newNode->members[i].secondName = (char*)malloc((strlen(team->members[i].secondName) + 1) * sizeof(char));
+            strcpy(newNode->members[i].firstName, team->members[i].firstName);
+            strcpy(newNode->members[i].secondName, team->members[i].secondName);
+            newNode->members[i].points = team->members[i].points;
+        }
+        if(strcmp(newNode->name, root->name) < 0){
+            newNode->left = root->left;
+            root->left = newNode;
+        }else if(strcmp(newNode->name, root->name) > 0){
+            newNode->right = root->right;
+            root->right = newNode;
+        }
+    }
     return root;
 }
 
+//inorder din curs, dar elementele se scriu în ordine descrescătoare (right, root, left)
 void inorderReverse(Node* root, FILE* out){
     if(root != NULL){
         inorderReverse(root->right, out);
