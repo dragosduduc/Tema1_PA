@@ -271,54 +271,43 @@ void playMatches(Queue* q, Team** win, Team** lose, FILE* out){
             }
 }
 
-//insertInBST din curs, modificată pentru tipul Team
+//se creează un nod pe baza informațiilor echipei date ca parametru
+Node* createNode(Team* team){
+    int i;
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->numberOfPlayers = team->numberOfPlayers;
+    newNode->members = (Player*)malloc(newNode->numberOfPlayers * sizeof(Player));
+    newNode->points = team->points;
+    newNode->name = (char*)malloc((strlen(team->name) + 1) * sizeof(char));
+    strcpy(newNode->name, team->name);
+    for(i = 0; i < team->numberOfPlayers; i++){
+        newNode->members[i].firstName = (char*)malloc((strlen(team->members[i].firstName) + 1) * sizeof(char));
+        newNode->members[i].secondName = (char*)malloc((strlen(team->members[i].secondName) + 1) * sizeof(char));
+        strcpy(newNode->members[i].firstName, team->members[i].firstName);
+        strcpy(newNode->members[i].secondName, team->members[i].secondName);
+        newNode->members[i].points = team->members[i].points;
+    }
+    return newNode;
+}
+
 Node* insertInBST(Node* root, Team* team){
     if(root == NULL){
         //se creează un nou nod și se pune la finalul BST-ului
-        int i;
-        Node* newNode = (Node*)malloc(sizeof(Node));
-        newNode->numberOfPlayers = team->numberOfPlayers;
-        newNode->members = (Player*)malloc(newNode->numberOfPlayers * sizeof(Team));
-        newNode->points = team->points;
-        newNode->name = (char*)malloc((strlen(team->name) + 1) * sizeof(char));
-        strcpy(newNode->name, team->name);
-        for(i = 0; i < team->numberOfPlayers; i++){
-            newNode->members[i].firstName = (char*)malloc((strlen(team->members[i].firstName) + 1) * sizeof(char));
-            newNode->members[i].secondName = (char*)malloc((strlen(team->members[i].secondName) + 1) * sizeof(char));
-            strcpy(newNode->members[i].firstName, team->members[i].firstName);
-            strcpy(newNode->members[i].secondName, team->members[i].secondName);
-            newNode->members[i].points = team->members[i].points;
-        }
+        Node* newNode = createNode(team);
         newNode->left = newNode->right = NULL;
         return newNode;
     }
+    //dacă key < (sau >) points, se apelează funcția pentru subarborele stâng (sau drept)
     if(team->points < root->points)
         root->left = insertInBST(root->left, team);
     else if(team->points > root->points)
         root->right = insertInBST(root->right, team);
+    //dacă key == points, se compară lexicografic numele echipelor și se apelează funcția pentru subarborele corespunzător
     else if(team->points == root->points){
-        //se creează un nou nod și se pune pe următorul nivel față de root-ul curent(au același punctaj, deci se compară în funcție de nume)
-        int i;
-        Node* newNode = (Node*)malloc(sizeof(Node));
-        newNode->numberOfPlayers = team->numberOfPlayers;
-        newNode->members = (Player*)malloc(newNode->numberOfPlayers * sizeof(Team));
-        newNode->points = team->points;
-        newNode->name = (char*)malloc((strlen(team->name) + 1) * sizeof(char));
-        strcpy(newNode->name, team->name);
-        for(i = 0; i < team->numberOfPlayers; i++){
-            newNode->members[i].firstName = (char*)malloc((strlen(team->members[i].firstName) + 1) * sizeof(char));
-            newNode->members[i].secondName = (char*)malloc((strlen(team->members[i].secondName) + 1) * sizeof(char));
-            strcpy(newNode->members[i].firstName, team->members[i].firstName);
-            strcpy(newNode->members[i].secondName, team->members[i].secondName);
-            newNode->members[i].points = team->members[i].points;
-        }
-        if(strcmp(newNode->name, root->name) < 0){
-            newNode->left = root->left;
-            root->left = newNode;
-        }else if(strcmp(newNode->name, root->name) > 0){
-            newNode->right = root->right;
-            root->right = newNode;
-        }
+        if(strcmp(team->name, root->name) < 0)
+            root->left = insertInBST(root->left, team);
+        else if(strcmp(team->name, root->name) > 0)
+            root->right = insertInBST(root->right, team);
     }
     return root;
 }
@@ -330,4 +319,133 @@ void inorderReverse(Node* root, FILE* out){
         fprintf(out, "%-33s -  %.2f\n", root->name, root->points);
         inorderReverse(root->left, out);
     }
+}
+
+//printLevel din curs - ROOT SE CONSIDERĂ PE NIVEL 0
+void fprintLevelInTree(FILE* out, Node* root, int level){
+    if(root == NULL) return;
+    if(level == 0) fprintf(out, "%s\n", root->name);
+    else if(level > 0){
+        fprintLevelInTree(out, root->right, level - 1);
+        fprintLevelInTree(out, root->left, level - 1);
+    }
+}
+
+//max din curs
+int max(int a, int b){
+    return ((a > b) ? a : b);
+}
+
+//nodeHeight din curs
+int nodeHeight(Node* root){
+    if(root == NULL) return -1;
+    else return root->height;
+}
+
+//se creează o echipă pe baza informațiilor nodului dat ca parametru
+Team* copyTeamFromNode(Node* node){
+    int i;
+    Team* newTeam = (Team*)malloc(sizeof(Team));
+    newTeam->numberOfPlayers = node->numberOfPlayers;
+    newTeam->members = (Player*)malloc(newTeam->numberOfPlayers * sizeof(Player));
+    newTeam->points = node->points;
+    newTeam->name = (char*)malloc((strlen(node->name) + 1) * sizeof(char));
+    strcpy(newTeam->name, node->name);
+    for(i = 0; i < node->numberOfPlayers; i++){
+        newTeam->members[i].firstName = (char*)malloc((strlen(node->members[i].firstName) + 1) * sizeof(char));
+        newTeam->members[i].secondName = (char*)malloc((strlen(node->members[i].secondName) + 1) * sizeof(char));
+        strcpy(newTeam->members[i].firstName, node->members[i].firstName);
+        strcpy(newTeam->members[i].secondName, node->members[i].secondName);
+        newTeam->members[i].points = node->members[i].points;
+    }
+    return newTeam;
+}
+
+//se parcurge lista în inordine și elementele se copiază într-o listă separată (elementele vor fi sortate crescător în listă)
+void createListFromTree(Node* root, Team** newList){
+    if(root != NULL){
+        createListFromTree(root->left, newList);
+        Team* newTeam = copyTeamFromNode(root);
+        newTeam->next = *newList;
+        *newList = newTeam;
+        createListFromTree(root->right, newList);
+    }
+}
+
+//rightRotation din curs
+Node* rightRotation(Node* z){
+    Node* y = z->left;
+    Node* T3 = y->right;
+    y->right = z;
+    z->left = T3;
+    z->height = max(nodeHeight(z->left), nodeHeight(z->right)) + 1;
+    y->height = max(nodeHeight(y->left), nodeHeight(y->right)) + 1;
+    return y;
+}
+
+//leftRotation din curs
+Node* leftRotation(Node* z){
+    Node* y = z->right;
+    Node* T2 = y->left;
+    y->left = z;
+    z->right = T2;
+    z->height = max(nodeHeight(z->left), nodeHeight(z->right)) + 1;
+    y->height = max(nodeHeight(y->left), nodeHeight(y->right)) + 1;
+    return y;
+}
+
+//LRRotation din curs
+Node* LRRotation(Node* z){
+    z->left = leftRotation(z->left);
+    return rightRotation(z);
+}
+
+//RLRotation din curs
+Node* RLRotation(Node* z){
+    z->right = rightRotation(z->right);
+    return leftRotation(z);
+}
+
+Node* insertInAVL(Node* root, Team* team){
+    if(root == NULL){
+        //se creează un nou nod și se pune la finalul AVL-ului
+        Node* newNode = createNode(team);
+        newNode->height = 0;
+        newNode->left = newNode->right = NULL;
+        return newNode;
+    }
+    //dacă key < (sau >) points, se apelează funcția pentru subarborele stâng (sau drept)
+    if(team->points < root->points)
+        root->left = insertInAVL(root->left, team);
+    else if(team->points > root->points)
+        root->right = insertInAVL(root->right, team);
+    else if(team->points == root->points){
+        //dacă key == points, se compară lexicografic numele echipelor și se apelează funcția pentru subarborele corespunzător
+        if(strcmp(team->name, root->name) < 0)
+            root->left = insertInAVL(root->left, team);
+        else if(strcmp(team->name, root->name) > 0)
+            root->right = insertInAVL(root->right, team);
+    }
+    //se stabilesc înălțimea și factorul de echilibru pe fiecare nod
+    root->height = max(nodeHeight(root->left), nodeHeight(root->right)) + 1;
+    int balance = nodeHeight(root->left) - nodeHeight(root->right);
+    //rotațiile, când punctajele sunt diferite
+    if(balance > 1 && team->points < root->left->points)
+        return rightRotation(root);
+    if(balance < -1 && team->points > root->right->points)
+        return leftRotation(root);
+    if(balance > 1 && team->points > root->left->points)
+        return LRRotation(root);
+    if(balance < -1 && team->points < root->right->points)
+        return RLRotation(root);
+    //rotațiile, când punctajele sunt egale (aceleași rotații, dar se stabilesc pe baza numelor echipelor)
+    if(balance > 1 && strcmp(team->name, root->left->name) < 0)
+        return rightRotation(root);
+    if(balance < -1 && strcmp(team->name, root->right->name) > 0)
+        return leftRotation(root);
+    if(balance > 1 && strcmp(team->name, root->left->name) > 0)
+        return LRRotation(root);
+    if(balance < -1 && strcmp(team->name, root->right->name) < 0)
+        return RLRotation(root);
+    return root;
 }

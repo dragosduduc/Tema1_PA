@@ -36,6 +36,7 @@ struct echipaInArbore{
     Player* members;
     float points;
     struct echipaInArbore *left, *right;
+    int height;
 };
 typedef struct echipaInArbore Node;
 
@@ -58,7 +59,18 @@ void moveMatchesFromStackToQueue(Queue*, Team**, int, FILE*);
 void matchResult(Team*, Team*, Team**, Team**);
 void copyTeamsFromStackToList(Team*, Team**);
 void playMatches(Queue*, Team**, Team**, FILE*);
+Node* createNode(Team*);
 Node* insertInBST(Node*, Team*);
 void inorderReverse(Node*, FILE*);
+void fprintLevelInTree(FILE*, Node*, int);
+int max(int, int);
+int nodeHeight(Node*);
+Team* copyTeamFromNode(Node* node);
+void createListFromTree(Node*, Team**);
+Node* rightRotation(Node*);
+Node* leftRotation(Node*);
+Node* LRRotation(Node*);
+Node* RLRotation(Node*);
+Node* insertInAVL(Node*, Team*);
 
 #endif // BIBLIOTECA_H_INCLUDED

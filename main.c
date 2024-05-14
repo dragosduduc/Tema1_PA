@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "biblioteca.h"
 int main(int argc, char* argv[]){
 
@@ -48,8 +49,8 @@ int main(int argc, char* argv[]){
 
     //se deschide fișierul de ieșire
     FILE* out;
-    if((out = fopen("/home/dragosduduc/TEMA1_PA/r.out", "wt")) == NULL){
-        printf("Fisierul de iesire nu a putut fi deschis.\n");
+    if((out = fopen(argv[3], "wt")) == NULL){
+        printf("Fisierul de intrare nu a putut fi deschis.\n");
         exit(1);
     }
     
@@ -113,6 +114,26 @@ int main(int argc, char* argv[]){
 
         //se parcurge BST-ul în ordine descrescătoare
         inorderReverse(BST, out);
+    }
+
+    //se rezolvă cerința 5, dacă se cere
+    Node* AVL = NULL;
+    if(task[4] == 1){
+
+        //se parcurge crescător BST-ul, iar echipele se adaugă la începului listei (care, la final, va conține echipele în ordine descrescătoare)
+        Team* quarterFinalistsRanked = NULL;
+        createListFromTree(BST, &quarterFinalistsRanked);
+        Team* iter = quarterFinalistsRanked;
+        while(iter != NULL){
+            
+            //echipele din lista sortată descrescător se pun, pe rând, în AVL
+            AVL = insertInAVL(AVL, iter);
+            iter = iter->next;
+        }
+
+        //se afișează echipele de pe nivelul 2
+        fprintf(out, "\nTHE LEVEL 2 TEAMS ARE:\n");
+        fprintLevelInTree(out, AVL, 2);
     }
 
     fclose(out);
