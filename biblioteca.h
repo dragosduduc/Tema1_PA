@@ -42,6 +42,7 @@ typedef struct echipaInArbore Node;
 
 void createInitialList(Team**, int, FILE*);
 int teamsRemaining(int numberOfTeams);
+void freeTeam(Team*);
 void eliminateWorstTeams(Team**, int);
 void writeList(Team*, FILE*);
 void writeListWithPoints(Team*, FILE*);
@@ -49,6 +50,7 @@ Queue* createQueue();
 void enQueue(Queue*, Match*);
 int queueIsEmpty(Queue*);
 Match* deQueue(Queue*);
+void freeQueue(Queue*);
 void moveMatchesFromListToQueue(Queue*, Team**, int);
 void writeQueue(Queue*, FILE*);
 void push(Team**, Team*);
@@ -72,5 +74,7 @@ Node* leftRotation(Node*);
 Node* LRRotation(Node*);
 Node* RLRotation(Node*);
 Node* insertInAVL(Node*, Team*);
+void freeNode(Node*);
+void freeTree(Node*);
 
 #endif // BIBLIOTECA_H_INCLUDED

@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "biblioteca.h"
 int main(int argc, char* argv[]){
 
@@ -29,8 +28,8 @@ int main(int argc, char* argv[]){
     fscanf(d_in, "%d", &numberOfTeams);
 
     //se formează lista de echipe
-    Team* head = NULL;
-    createInitialList(&head, numberOfTeams, d_in);
+    Team* mainList = NULL;
+    createInitialList(&mainList, numberOfTeams, d_in);
 
     fclose(d_in);
 
@@ -44,7 +43,7 @@ int main(int argc, char* argv[]){
         int teamsToEliminate = numberOfTeams - maxPower;
 
         //se elimină echipele cu cele mai mici punctaje, pentru a se ajunge la un număr de echipe - putere a lui 2
-        eliminateWorstTeams(&head, teamsToEliminate);
+        eliminateWorstTeams(&mainList, teamsToEliminate);
     }
 
     //se deschide fișierul de ieșire
@@ -55,7 +54,7 @@ int main(int argc, char* argv[]){
     }
     
     //se scrie lista formată în fișierul de ieșire
-    writeList(head, out);
+    writeList(mainList, out);
     
     //se rezolvă cerința 3, dacă se cere
     Team* quarterFinalists = NULL;
@@ -64,7 +63,7 @@ int main(int argc, char* argv[]){
         //se creează și se populează coada de meciuri
         Queue* q;
         q = createQueue();
-        moveMatchesFromListToQueue(q, &head, maxPower);
+        moveMatchesFromListToQueue(q, &mainList, maxPower);
 
         //se stabilește numărul rundei curente
         int roundNumber = 0;
@@ -98,6 +97,9 @@ int main(int argc, char* argv[]){
         //echipa câștigătoare, care a rămas în stivă (la ultimul ciclu, maxPower intră în funcția putMatchesFromStackToQueue cu valoarea 0), se scoate din stivă și se afișează
         Team* champs = pop(&winnerStackTop);
         fprintf(out, "%-33s -  %.2f\n", champs->name, champs->points);
+
+        //se eliberează spațiul de memorie alocat cozii de meciuri
+        freeQueue(q);
     }
 
     //se rezolvă cerința 4, dacă se cere
@@ -112,6 +114,14 @@ int main(int argc, char* argv[]){
             iter = iter->next;
         }
 
+        //se șterge lista celor mai bune 8 echipe
+        iter = quarterFinalists;
+        while(iter != NULL){
+            Team* temp = iter;
+            iter = iter->next;
+            freeTeam(temp);
+        }
+
         //se parcurge BST-ul în ordine descrescătoare
         inorderReverse(BST, out);
     }
@@ -123,10 +133,13 @@ int main(int argc, char* argv[]){
         //se parcurge crescător BST-ul, iar echipele se adaugă la începului listei (care, la final, va conține echipele în ordine descrescătoare)
         Team* quarterFinalistsRanked = NULL;
         createListFromTree(BST, &quarterFinalistsRanked);
+
+        //se eliberează memoria alocată BST-ului
+        freeTree(BST);
+
+        //echipele din lista sortată descrescător se pun, pe rând, în AVL
         Team* iter = quarterFinalistsRanked;
         while(iter != NULL){
-            
-            //echipele din lista sortată descrescător se pun, pe rând, în AVL
             AVL = insertInAVL(AVL, iter);
             iter = iter->next;
         }
@@ -134,6 +147,17 @@ int main(int argc, char* argv[]){
         //se afișează echipele de pe nivelul 2
         fprintf(out, "\nTHE LEVEL 2 TEAMS ARE:\n");
         fprintLevelInTree(out, AVL, 2);
+
+        //se eliberează memoria alocată listei ordonate de echipe
+        iter = quarterFinalistsRanked;
+        while(iter != NULL){
+            Team* temp = iter;
+            iter = iter->next;
+            freeTeam(temp);
+        }
+
+        //se eliberează memoria alocată AVL-ului
+        freeTree(AVL);
     }
 
     fclose(out);
